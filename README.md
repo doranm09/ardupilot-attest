@@ -78,9 +78,11 @@ Outputs:
 - `outputs/param_hash_demo.response.json`
 
 Note:
-- Current demo request uses `MAV_SYSID`, `MAV_GCS_SYSID`, and `FRAME_CLASS`.
+- Current selected-profile request tracks operational/failsafe parameters:
+  - `WPNAV_SPEED`, `WPNAV_ACCEL`, `RTL_ALT`
+  - `FS_THR_ENABLE`, `FS_GCS_ENABLE`, `BATT_FS_LOW_ACT`, `FENCE_ENABLE`
 - Some ArduPilot versions/vehicle types do not expose older names like `SYSID_THISMAV` / `SYSID_MYGCS`.
-- To inspect available names from MAVProxy output: `rg '^MAV_|^SYSID_|^FRAME_' ~/git/ardupilot/mav.parm`
+- To inspect available names from MAVProxy output: `rg '^(WPNAV_|RTL_|FS_|BATT_|FENCE_)' ~/git/ardupilot/mav.parm`
 - `EvOutSig.OutN` must exactly match ASP `RawEv` entry count. This demo uses `OutN=3`.
 
 ## Full Parameter Measurement Flow (all available params)
@@ -210,7 +212,7 @@ Useful options:
 # Keep mission running on valid appraisal
 ./scripts/run_sitl_map_attest_demo.sh --pass-attestation
 
-# Use full-parameter profile instead of selected 3 parameters
+# Use full-parameter profile instead of the selected operational/failsafe set
 ./scripts/run_sitl_map_attest_demo.sh --param-profile all
 
 # Use a different endpoint
@@ -242,8 +244,8 @@ Notes:
 3. In MAVProxy, change a measured value, for example:
 
 ```text
-param set MAV_GCS_SYSID 250
-param fetch MAV_GCS_SYSID
+param set WPNAV_SPEED 1200
+param fetch WPNAV_SPEED
 ```
 
 4. Re-run appraisal. Parameter hash no longer matches baseline, so result becomes `INVALID` and the script commands `RTL`.

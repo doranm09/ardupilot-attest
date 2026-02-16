@@ -34,9 +34,13 @@
           "master": "udp:127.0.0.1:14550",
           "timeout_sec": 20,
           "param_names": [
-            "MAV_SYSID",
-            "MAV_GCS_SYSID",
-            "FRAME_CLASS"
+            "WPNAV_SPEED",
+            "WPNAV_ACCEL",
+            "RTL_ALT",
+            "FS_THR_ENABLE",
+            "FS_GCS_ENABLE",
+            "BATT_FS_LOW_ACT",
+            "FENCE_ENABLE"
           ]
         },
         "ASP_PLC": "uav1",
