@@ -32,7 +32,8 @@
         "ASP_ID": "ardupilot_mission_hash",
         "ASP_ARGS": {
           "master": "udp:127.0.0.1:14550",
-          "timeout_sec": 20
+          "timeout_sec": 20,
+          "dump_path": "outputs/mission_hash_demo.canonical.txt"
         },
         "ASP_PLC": "uav1",
         "ASP_TARG_ID": "ap_mission_state"

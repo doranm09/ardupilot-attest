@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import pathlib
 import sys
 import time
 from typing import Dict, List, Tuple
@@ -23,13 +24,14 @@ def _err(msg: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
-def _parse_args(req: dict) -> Tuple[str, float]:
+def _parse_args(req: dict) -> Tuple[str, float, str | None]:
     asp_args = req.get("ASP_ARGS", {})
     if not isinstance(asp_args, dict):
         _err("ASP_ARGS must be a JSON object.")
 
     master = str(asp_args.get("master", "udp:127.0.0.1:14550"))
     timeout_raw = asp_args.get("timeout_sec", 20)
+    dump_path_raw = asp_args.get("dump_path", None)
     try:
         timeout_sec = float(timeout_raw)
     except Exception as exc:
@@ -38,7 +40,13 @@ def _parse_args(req: dict) -> Tuple[str, float]:
     if timeout_sec <= 0:
         _err("timeout_sec must be > 0.")
 
-    return master, timeout_sec
+    dump_path = None
+    if dump_path_raw is not None:
+        if not isinstance(dump_path_raw, str):
+            _err("dump_path must be a string or null.")
+        dump_path = dump_path_raw.strip() or None
+
+    return master, timeout_sec, dump_path
 
 
 def _fmt_num(v) -> str:
@@ -202,7 +210,7 @@ def main() -> None:
         _err("No ASP request JSON on stdin.")
 
     req = json.loads(req_text)
-    master_endpoint, timeout_sec = _parse_args(req)
+    master_endpoint, timeout_sec, dump_path = _parse_args(req)
 
     try:
         from pymavlink import mavutil  # type: ignore
@@ -223,6 +231,10 @@ def main() -> None:
     target_comp = int(conn.target_component or 1)
 
     lines = _fetch_mission_lines(conn, target_sys, target_comp, timeout_sec)
+    if dump_path:
+        # Debugging aid: write canonical mission lines to a file for diffing across
+        # execution phases (ground vs takeoff vs in-flight).
+        pathlib.Path(dump_path).expanduser().write_text("\n".join(lines) + "\n", encoding="utf-8")
     digest = hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
 
     payload = {

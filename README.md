@@ -120,10 +120,12 @@ source .venv/bin/activate
 Outputs:
 - `outputs/mission_hash_demo.log`
 - `outputs/mission_hash_demo.response.json`
+- `outputs/mission_hash_demo.canonical.txt` (canonical mission lines for diff/debug)
 
 Note:
 - Mission hash ignores `MISSION_ITEM.current` (execution state).
 - Mission hash normalizes takeoff position (`MAV_CMD_NAV_TAKEOFF`) to keep baselines stable across switching to `AUTO` / takeoff when ArduPilot rewrites the takeoff item.
+- You can diff the plan across phases (ground vs takeoff) using `outputs/mission_hash_demo.canonical.txt`.
 
 ## Capture Baselines (for real pass/fail appraisal)
 
