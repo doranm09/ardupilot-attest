@@ -1,0 +1,8 @@
+{
+  "ASPS": ["ardupilot_param_hash"],
+  "ASP_FS_MAP": {
+    "ardupilot_param_hash": "ardupilot_param_hash_asp.py"
+  },
+  "POLICY": []
+}
+

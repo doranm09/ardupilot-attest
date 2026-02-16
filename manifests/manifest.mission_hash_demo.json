@@ -1,0 +1,7 @@
+{
+  "ASPS": ["ardupilot_mission_hash"],
+  "ASP_FS_MAP": {
+    "ardupilot_mission_hash": "ardupilot_mission_hash_asp.py"
+  },
+  "POLICY": []
+}

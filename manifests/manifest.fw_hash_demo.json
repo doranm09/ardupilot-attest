@@ -1,0 +1,7 @@
+{
+  "ASPS": ["ardupilot_fw_hash"],
+  "ASP_FS_MAP": {
+    "ardupilot_fw_hash": "ardupilot_fw_hash_asp.sh"
+  },
+  "POLICY": []
+}

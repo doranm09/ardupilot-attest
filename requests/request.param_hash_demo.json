@@ -1,0 +1,47 @@
+{
+  "TYPE": "REQUEST",
+  "ACTION": "RUN",
+  "ATTESTATION_SESSION": {
+    "Session_Plc": "uav1",
+    "Plc_Mapping": {},
+    "PubKey_Mapping": {},
+    "Session_Context": {
+      "ASP_Types": {
+        "ardupilot_param_hash": {
+          "FWD": "REPLACE",
+          "EvInSig": "NONE",
+          "EvOutSig": {
+            "EvOutSig_CONSTRUCTOR": "OutN",
+            "EvOutSig_BODY": 3
+          }
+        }
+      },
+      "ASP_Comps": {}
+    }
+  },
+  "REQ_PLC": "uav1",
+  "EVIDENCE": [
+    {"RawEv": []},
+    {"EvidenceT_CONSTRUCTOR": "mt_evt"}
+  ],
+  "TERM": {
+    "TERM_CONSTRUCTOR": "asp",
+    "TERM_BODY": {
+      "ASP_CONSTRUCTOR": "ASPC",
+      "ASP_BODY": {
+        "ASP_ID": "ardupilot_param_hash",
+        "ASP_ARGS": {
+          "master": "udp:127.0.0.1:14550",
+          "timeout_sec": 20,
+          "param_names": [
+            "MAV_SYSID",
+            "MAV_GCS_SYSID",
+            "FRAME_CLASS"
+          ]
+        },
+        "ASP_PLC": "uav1",
+        "ASP_TARG_ID": "ap_param_state"
+      }
+    }
+  }
+}

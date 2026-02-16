@@ -1,0 +1,24 @@
+{
+  "TYPE": "REQUEST",
+  "ACTION": "RUN",
+  "ATTESTATION_SESSION": {
+    "Session_Plc": "uav1",
+    "Plc_Mapping": {},
+    "PubKey_Mapping": {},
+    "Session_Context": {
+      "ASP_Types": {},
+      "ASP_Comps": {}
+    }
+  },
+  "REQ_PLC": "uav1",
+  "EVIDENCE": [
+    {"RawEv": []},
+    {"EvidenceT_CONSTRUCTOR": "mt_evt"}
+  ],
+  "TERM": {
+    "TERM_CONSTRUCTOR": "asp",
+    "TERM_BODY": {
+      "ASP_CONSTRUCTOR": "NULL"
+    }
+  }
+}

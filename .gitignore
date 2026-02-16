@@ -1,0 +1,14 @@
+.venv/
+scripts/venv/
+
+__pycache__/
+*.pyc
+
+outputs/*.log
+outputs/*.response.json
+outputs/*.tlog
+outputs/*.bin
+outputs/*.parm
+outputs/*.sitl.log
+outputs/ardupilot_fw_hash_req.json
+outputs/*.pid
