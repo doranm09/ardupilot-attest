@@ -759,6 +759,16 @@ def main() -> int:
         action="store_true",
         help="Skip mission-waypoint appraisal and only evaluate parameter hash.",
     )
+    parser.add_argument(
+        "--skip-mission-upload",
+        action="store_true",
+        help="Assume the mission is already uploaded; do not re-run the upload sequence.",
+    )
+    parser.add_argument(
+        "--skip-auto-flight",
+        action="store_true",
+        help="Skip automated GUIDED takeoff/AUTO mission start; expect manual control via MAVProxy.",
+    )
     parser.add_argument("--attest-root", default=None, help="Path to ardupilot-attest root")
     parser.add_argument(
         "--no-disable-arming-check",
@@ -838,60 +848,67 @@ def main() -> int:
     )
 
     mission_file = pathlib.Path(args.mission_file).expanduser()
-    if mission_file.exists():
-        mission = _parse_qgc_wpl_110(mission_file)
-        print(f"[INFO] Uploading mission file {mission_file} with {len(mission)} items...")
+    if args.skip_mission_upload:
+        print("[INFO] Skipping mission upload (manual mission assumed).")
     else:
-        lat, lon = _get_position(master)
-        mission = _build_demo_mission(lat, lon, args.alt)
-        print(
-            f"[WARN] Mission file not found ({mission_file}); using generated demo mission ({len(mission)} items)."
-        )
-    _upload_mission(master, mission)
-
-    if not args.no_disable_arming_check:
-        print("[INFO] Setting ARMING_CHECK=0 for SITL demo convenience...")
-        try:
-            _set_param(master, "ARMING_CHECK", 0)
-        except Exception as exc:
-            print(f"[WARN] Could not confirm ARMING_CHECK update: {exc}")
-
-    print("[INFO] Switching to GUIDED, arming, and taking off...")
-    _set_mode(master, "GUIDED")
-    _arm(master)
-    _guided_takeoff(master, rel_alt_m=args.alt)
-    start_lat, start_lon = _get_position(master, timeout=8.0)
+        if mission_file.exists():
+            mission = _parse_qgc_wpl_110(mission_file)
+            print(f"[INFO] Uploading mission file {mission_file} with {len(mission)} items...")
+        else:
+            lat, lon = _get_position(master)
+            mission = _build_demo_mission(lat, lon, args.alt)
+            print(
+                f"[WARN] Mission file not found ({mission_file}); using generated demo mission ({len(mission)} items)."
+            )
+        _upload_mission(master, mission)
 
     auto_started = False
-    print("[INFO] Attempting AUTO mission start after takeoff...")
-    try:
-        _set_mode(master, "AUTO")
-        _start_mission(master)
-        auto_started = True
-        print(
-            "[INFO] AUTO mission running; waiting for mission progress before attestation..."
-        )
-        progressed = _wait_for_mission_progress(
-            master,
-            timeout=args.pre_attestation_timeout,
-            min_seq=args.pre_attestation_min_seq,
-            min_move_m=args.pre_attestation_min_move_m,
-            start_lat=start_lat,
-            start_lon=start_lon,
-        )
-        if not progressed:
-            print(
-                "[WARN] Did not observe mission progress signal before attestation timeout; proceeding."
-            )
-    except Exception as exc:
-        print(f"[WARN] AUTO mission start failed: {exc}")
-        print("[INFO] Falling back to GUIDED leg before attestation.")
+    start_lat = start_lon = None
+    if not args.skip_auto_flight:
+        if not args.no_disable_arming_check:
+            print("[INFO] Setting ARMING_CHECK=0 for SITL demo convenience...")
+            try:
+                _set_param(master, "ARMING_CHECK", 0)
+            except Exception as exc:
+                print(f"[WARN] Could not confirm ARMING_CHECK update: {exc}")
+
+        print("[INFO] Switching to GUIDED, arming, and taking off...")
         _set_mode(master, "GUIDED")
-        if not master.motors_armed():
-            print("[INFO] Vehicle disarmed during AUTO attempt; re-arming in GUIDED.")
-            _arm(master)
+        _arm(master)
         _guided_takeoff(master, rel_alt_m=args.alt)
-        time.sleep(min(5.0, max(0.0, args.pre_attestation_timeout)))
+        start_lat, start_lon = _get_position(master, timeout=8.0)
+
+        print("[INFO] Attempting AUTO mission start after takeoff...")
+        try:
+            _set_mode(master, "AUTO")
+            _start_mission(master)
+            auto_started = True
+            print(
+                "[INFO] AUTO mission running; waiting for mission progress before attestation..."
+            )
+            progressed = _wait_for_mission_progress(
+                master,
+                timeout=args.pre_attestation_timeout,
+                min_seq=args.pre_attestation_min_seq,
+                min_move_m=args.pre_attestation_min_move_m,
+                start_lat=start_lat,
+                start_lon=start_lon,
+            )
+            if not progressed:
+                print(
+                    "[WARN] Did not observe mission progress signal before attestation timeout; proceeding."
+                )
+        except Exception as exc:
+            print(f"[WARN] AUTO mission start failed: {exc}")
+            print("[INFO] Falling back to GUIDED leg before attestation.")
+            _set_mode(master, "GUIDED")
+            if not master.motors_armed():
+                print("[INFO] Vehicle disarmed during AUTO attempt; re-arming in GUIDED.")
+                _arm(master)
+            _guided_takeoff(master, rel_alt_m=args.alt)
+            time.sleep(min(5.0, max(0.0, args.pre_attestation_timeout)))
+    else:
+        print("[INFO] Skipping guided takeoff/mission start; assume MAVProxy handles flight.")
 
     mode_desc = "periodic" if args.periodic_attestation else "one-shot"
     print(f"[INFO] Running {mode_desc} attestation/appraisal while mission is active...")
@@ -924,7 +941,10 @@ def main() -> int:
             if auto_started:
                 print("[RESULT] Attestation VALID -> mission continues in AUTO.")
             else:
-                print("[RESULT] Attestation VALID -> vehicle remains in GUIDED demo leg.")
+                if args.skip_auto_flight:
+                    print("[RESULT] Attestation VALID -> vehicle under operator control.")
+                else:
+                    print("[RESULT] Attestation VALID -> vehicle remains in GUIDED demo leg.")
             return 0
 
         if args.attestation_cycles > 0 and cycle >= args.attestation_cycles:

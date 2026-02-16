@@ -231,6 +231,10 @@ Useful options:
 ./scripts/run_sitl_map_attest_demo.sh --periodic-attestation --attestation-interval 10 --attestation-cycles 3
 ```
 
+Additional automation controls:
+- `--skip-mission-upload`: when you want to prepare/upload waypoints manually (MAVProxy) before running the demo.
+- `--skip-auto-flight`: skip the guided takeoff/mission start sequence and let your MAVProxy session arm/takeoff/time the mission; the script will still connect and run attestation cycles afterward.
+
 Notes:
 - Script tries full `AUTO` mission first; if mode change is rejected by SITL state, it falls back to a `GUIDED` leg, then still runs appraisal.
 - Default mode is one-shot appraisal; periodic mode is enabled with `--periodic-attestation`.
