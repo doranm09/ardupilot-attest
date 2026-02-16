@@ -118,6 +118,13 @@ def _extract_item(msg) -> Tuple[int, str]:
         lon = float(getattr(msg, "y", 0.0))
         alt = float(getattr(msg, "z", 0.0))
 
+    # MAV_CMD_NAV_TAKEOFF (22) may have its lat/lon rewritten by ArduPilot when the
+    # mission is started (AUTO), even though the plan is semantically unchanged.
+    # Normalizing takeoff position keeps the mission "plan hash" stable across takeoff.
+    if command == 22:
+        lat = 0.0
+        lon = 0.0
+
     return seq, _canonical_line(seq, frame, command, autocontinue, p1, p2, p3, p4, lat, lon, alt)
 
 
