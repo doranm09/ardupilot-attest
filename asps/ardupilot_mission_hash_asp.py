@@ -45,9 +45,24 @@ def _fmt_num(v) -> str:
     return format(float(v), ".9g")
 
 
-def _canonical_line(seq: int, frame: int, command: int, current: int, autocontinue: int, p1, p2, p3, p4, lat, lon, alt) -> str:
+def _canonical_line(
+    seq: int,
+    frame: int,
+    command: int,
+    autocontinue: int,
+    p1,
+    p2,
+    p3,
+    p4,
+    lat,
+    lon,
+    alt,
+) -> str:
     return (
-        f"{seq}|{frame}|{command}|{current}|{autocontinue}|"
+        # Intentionally ignore MISSION_ITEM.current. It is execution state (which item is "current")
+        # and will change when switching to AUTO / starting the mission, even if the mission plan
+        # itself is unchanged.
+        f"{seq}|{frame}|{command}|{autocontinue}|"
         f"{_fmt_num(p1)}|{_fmt_num(p2)}|{_fmt_num(p3)}|{_fmt_num(p4)}|"
         f"{_fmt_num(lat)}|{_fmt_num(lon)}|{_fmt_num(alt)}"
     )
@@ -88,7 +103,6 @@ def _extract_item(msg) -> Tuple[int, str]:
     seq = int(getattr(msg, "seq", -1))
     frame = int(getattr(msg, "frame", 0))
     command = int(getattr(msg, "command", 0))
-    current = int(getattr(msg, "current", 0))
     autocontinue = int(getattr(msg, "autocontinue", 0))
     p1 = float(getattr(msg, "param1", 0.0))
     p2 = float(getattr(msg, "param2", 0.0))
@@ -104,7 +118,7 @@ def _extract_item(msg) -> Tuple[int, str]:
         lon = float(getattr(msg, "y", 0.0))
         alt = float(getattr(msg, "z", 0.0))
 
-    return seq, _canonical_line(seq, frame, command, current, autocontinue, p1, p2, p3, p4, lat, lon, alt)
+    return seq, _canonical_line(seq, frame, command, autocontinue, p1, p2, p3, p4, lat, lon, alt)
 
 
 def _fetch_mission_lines(conn, target_sys: int, target_comp: int, timeout_sec: float) -> List[str]:

@@ -121,6 +121,9 @@ Outputs:
 - `outputs/mission_hash_demo.log`
 - `outputs/mission_hash_demo.response.json`
 
+Note:
+- Mission hash ignores `MISSION_ITEM.current` (execution state). This keeps baselines stable when you switch to `AUTO` / start the mission.
+
 ## Capture Baselines (for real pass/fail appraisal)
 
 Capture parameter baseline:
