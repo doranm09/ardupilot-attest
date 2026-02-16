@@ -1,0 +1,12 @@
+[submodule "submodules/cvm"]
+	path = submodules/cvm
+	url = https://github.com/doranm09/cvm.git
+[submodule "submodules/copland-avm"]
+	path = submodules/copland-avm
+	url = https://github.com/doranm09/copland-avm.git
+[submodule "submodules/vs-copland"]
+	path = submodules/vs-copland
+	url = https://github.com/doranm09/vs-copland.git
+[submodule "submodules/coq"]
+	path = submodules/coq
+	url = https://github.com/doranm09/coq.git
